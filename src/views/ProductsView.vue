@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Loading :active="isLoading"></Loading>
+    <Loading :active="isLoading" :z-index="1060"></Loading>
     <!-- 商品列表 -->
     <div class="mt-4">
       <ProductDetail :product="product" @add-to-cart="addToCart" ref="orderProductModal">

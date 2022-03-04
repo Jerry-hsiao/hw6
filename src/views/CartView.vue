@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <Loading :active="isLoading" :z-index="1060"></Loading>
     <div>
         <!-- 購物車 -->
     <div class="text-end">
@@ -191,47 +192,58 @@ export default {
       loadingStatus: {
         loadingItem: '',
       },
+      isLoading: false,
     };
   },
   methods: {
     getCarts() {
+      this.isLoading = true;
       this.$http
         .get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/cart`)
         .then((res) => {
           this.cartData = res.data.data;
+          this.isLoading = false;
         })
         .catch((err) => {
+          this.isLoading = false;
           // eslint-disable-next-line no-alert
           alert(err.data.message);
         });
     },
     removeCart(id) {
+      this.isLoading = true;
       this.$http
         .delete(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/cart/${id}`)
         .then((res) => {
           // eslint-disable-next-line no-alert
           alert(res.data.message);
           this.getCarts();
+          this.isLoading = false;
         })
         .catch((err) => {
+          this.isLoading = false;
           // eslint-disable-next-line no-alert
           alert(err.data.message);
         });
     },
     removeCartAll() {
+      this.isLoading = true;
       this.$http
         .delete(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/carts`)
         .then((res) => {
           // eslint-disable-next-line no-alert
           alert(res.data.message);
           this.getCarts();
+          this.isLoading = false;
         })
         .catch((err) => {
+          this.isLoading = false;
           // eslint-disable-next-line no-alert
           alert(err.data.message);
         });
     },
     updateCart(item) {
+      this.isLoading = true;
       this.loadingStatus.loadingItem = item.id;
       const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/cart/${item.id}`;
       const cart = {
@@ -245,37 +257,32 @@ export default {
           alert(response.data.message);
           this.getCarts();
           this.loadingStatus.loadingItem = '';
+          this.isLoading = false;
         })
         .catch((err) => {
+          this.isLoading = false;
           // eslint-disable-next-line no-alert
           alert(err.data.message);
         });
     },
     createOrder() {
-      this.$validator.validate().then((result) => {
-        if (result) {
-          const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/order`;
-          const order = this.form;
-          this.$http
-            .post(url, { data: order })
-            .then((response) => {
-              // eslint-disable-next-line no-alert
-              alert(response.data.message);
-              this.emptyForm();
-              this.getCarts();
-            })
-            .catch((err) => {
-              // eslint-disable-next-line no-console
-              console.log(`錯誤訊息${err}`);
-              // eslint-disable-next-line no-alert
-              alert(err.data);
-            });
-        } else {
-          // 驗證失敗產生的行為
-          // eslint-disable-next-line no-console
-          console.log('客戶戶資料填寫不完整');
-        }
-      });
+      this.isLoading = true;
+      const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/order`;
+      const order = this.form;
+      this.$http
+        .post(url, { data: order })
+        .then((response) => {
+          // eslint-disable-next-line no-alert
+          alert(response.data.message);
+          this.$refs.form.resetForm();
+          this.getCarts();
+          this.isLoading = false;
+        })
+        .catch((err) => {
+          this.isLoading = false;
+          // eslint-disable-next-line no-alert
+          alert(err.data);
+        });
     },
   },
   mounted() {
